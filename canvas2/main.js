@@ -20,7 +20,7 @@ for (i = 0;i < 20; i++)
   bullets[i] = [];
   for (j = 0; j < 5; j++)
   {
-    bullets[i][j] = {shooting: false, shot: false, x: 0, y:0}
+    bullets[i][j] = {onfield: false, shot: false, x: 0, y:0}
   }
 }
 //create instructions for drawing player;
@@ -80,7 +80,7 @@ function draw() {
   if (downPressed == true) {
     dy = 2;
   }
-  if ((shooting = true)) {
+  if ((onfield = true)) {
     for (i = 0; i < 20; i++)
     {
       for (j = 0; j < 5; j++)
