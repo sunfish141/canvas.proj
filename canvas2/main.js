@@ -4,26 +4,23 @@ const ctx = canvas.getContext("2d");
 let x = canvas.width / 2;
 let y = canvas.height / 2;
 const ballRadius = 10;
-const bulletRadius = 2
 let leftPressed = false;
 let rightPressed = false;
 let upPressed = false;
 let downPressed = false;
 let dx = 0;
 let dy = 0;
+//bullet
+var bulletXpos = 0;
+var bulletYpos = 0;
+const bulletWidth = 4;
+const bulletHeight = 6;
+var bulletYspeed = 10;
 spacePressed = 32;
-bullets = [];
 shooting = false;
+shot = false;
 
-for (i = 0;i < 20; i++)
-{
-  bullets[i] = [];
-  for (j = 0; j < 5; j++)
-  {
-    bullets[i][j] = {onfield: false, shot: false, x: 0, y:0}
-  }
-}
-//create instructions for drawing player;
+//create instructions for drawing player
 function drawPlayer() {
   ctx.beginPath();
   ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
@@ -32,38 +29,27 @@ function drawPlayer() {
   ctx.closePath();
 }
 
+function bulletShoot() {
+  if (shooting && shot == false) {
+    bulletXpos = x;
+    bulletYpos = y;
+  }
+}
 function createBullet() {
-  for (i = 0; i < 20; i++)
-  {
-    for (j = 0; j < 5; j++)
-    {
-      if (bullets[i][j].shot = true && (bullets[i][j].shooting = false))
-      {
-        bullets[i][j].shooting = true;
-        bullets[i][j].x = x;
-        bullets[i][j].y = y;
-      }
-      else if (bullets[i][j].shot = true && (bullets[i][j].shooting = true))
-      {
-        bullets[i][j].y -= 3;
-      }
-      if (bullets[i][j].shot = true)
-      {
-        ctx.beginPath();
-        ctx.arc(bullets[i][j].x, bullets[i][j].y, bulletRadius, 0, Math.PI * 2);
-        ctx.fillStyle = "#FF0000";
-        ctx.fill();
-        ctx.closePath();
-      }
-    }
-  }
-  }
+  ctx.beginPath();
+  ctx.Rect(bulletXpos, bulletYpos, bulletWidth, bulletHeight);
+  ctx.fillStyle = "#FF0000";
+  ctx.fill();
+  ctx.closePath();
+}
 
 //draw player
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawPlayer();
-  createBullet();
+  if ((shooting = true)) {
+    createBullet();
+  }
   x += dx;
   y += dy;
   dx = 0;
@@ -79,19 +65,6 @@ function draw() {
   }
   if (downPressed == true) {
     dy = 2;
-  }
-  if ((onfield = true)) {
-    for (i = 0; i < 20; i++)
-    {
-      for (j = 0; j < 5; j++)
-      {
-        if (bullets[i][j].shot = false)
-        {
-          bullets[i][j].shot = true;
-          console.log("registered");
-        }
-      }
-    }
   }
   requestAnimationFrame(draw);
 }
@@ -112,7 +85,6 @@ function keyDown(e) {
   }
   if (e.keyCode == spacePressed) {
     shooting = true;
-    console.log("fired");
   }
 }
 
@@ -125,9 +97,6 @@ function keyUp(e) {
     upPressed = false;
   } else if (e.key == "Down" || e.key == "ArrowDown") {
     downPressed = false;
-  }
-  if (e.keyCode == spacePressed) {
-    shooting = false;
   }
 }
 
