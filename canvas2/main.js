@@ -15,7 +15,7 @@ let dy = 0;
 let spacePressed = 32;
 let bullets = [];
 let shooting = false;
-let delay = 400;
+let delay = 200;
 let lastShot = 0;
 let enemies = [];
 let rectangleEnemyLength = 50;
@@ -83,6 +83,7 @@ function setEnemies() {
           return;
         } else {
           enemies[i][j].status = true;
+          enemies[i][j].hits = 0;
           rectangleEnemyCooldown = Date.now();
         }
       }
@@ -115,13 +116,20 @@ function createEnemies() {
           rectangleEnemyWidth,
           rectangleEnemyLength
         );
-        ctx.fillStyle = "#228B22";
-        ctx.fill();
-        ctx.closePath();
+        if (enemies[i][j].hits == 0) {
+          ctx.fillStyle = "#228B22";
+        } else if (enemies[i][j].hits == 1) {
+          ctx.fillStyle = "#FFFF00";
+        } else if (enemies[i][j].hits == 2) {
+          ctx.fillStyle = "#8b0000";
+        }
       }
+      ctx.fill();
+      ctx.closePath();
     }
   }
 }
+
 function detectCollisions() {
   for (i = 0; i < 20; i++) {
     for (j = 0; j < 5; j++) {
@@ -135,10 +143,13 @@ function detectCollisions() {
             bullets[q][p].shot == true &&
             enemies[i][j].status == true
           ) {
-            enemies[i][j].status = false;
-            enemies[i][j].moving = false;
+            enemies[i][j].hits++;
             bullets[q][p].shot = false;
             bullets[q][p].shooting = false;
+            if (enemies[i][j].hits == 3) {
+              enemies[i][j].status = false;
+              enemies[i][j].moving = false;
+            }
           }
         }
       }
@@ -203,8 +214,7 @@ function keyDown(e) {
     upPressed = true;
   } else if (e.key == "Down" || e.key == "ArrowDown") {
     downPressed = true;
-  }
-  if (e.keyCode == spacePressed) {
+  } else if (e.key == " " || e.keycode == spacePressed) {
     if (lastShot >= Date.now() - delay) {
       shooting = false;
     } else {
@@ -223,8 +233,7 @@ function keyUp(e) {
     upPressed = false;
   } else if (e.key == "Down" || e.key == "ArrowDown") {
     downPressed = false;
-  }
-  if (e.keyCode == spacePressed) {
+  } else if (e.key == " " || e.keyCode == spacePressed) {
     shooting = false;
   }
 }
