@@ -1,26 +1,44 @@
 const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
-
+//INITIALIZE VARIABLES
 let x = canvas.width / 2;
 let y = canvas.height / 2;
 const ballRadius = 10;
+const bulletWidth = 5;
+const bulletHeight = 20;
 let leftPressed = false;
 let rightPressed = false;
 let upPressed = false;
 let downPressed = false;
 let dx = 0;
 let dy = 0;
-//bullet
-var bulletXpos = 0;
-var bulletYpos = 0;
-const bulletWidth = 4;
-const bulletHeight = 6;
-var bulletYspeed = 10;
-spacePressed = 32;
-shooting = false;
-shot = false;
+let spacePressed = 32;
+let bullets = [];
+let shooting = false;
+let delay = 400;
+let lastShot = 0;
+let enemies = [];
+let rectangleEnemyLength = 50;
+let rectangleEnemyWidth = 50;
+let rectangleEnemyCooldown = 0;
+let rectangledelay = 1000;
 
-//create instructions for drawing player
+//POPULATE ARRAYS
+for (i = 0; i < 20; i++) {
+  bullets[i] = [];
+  for (j = 0; j < 5; j++) {
+    bullets[i][j] = { shooting: false, shot: false, x: 0, y: 0 };
+  }
+}
+
+for (i = 0; i < 20; i++) {
+  enemies[i] = [];
+  for (j = 0; j < 5; j++) {
+    enemies[i][j] = { x: 0, y: 0, status: false, moving: false, hits: 0 };
+  }
+}
+
+//create instructions for drawing player;
 function drawPlayer() {
   ctx.beginPath();
   ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
@@ -29,42 +47,145 @@ function drawPlayer() {
   ctx.closePath();
 }
 
-function bulletShoot() {
-  if (shooting && shot == false) {
-    bulletXpos = x;
-    bulletYpos = y;
+//Create and draw bullets
+function createBullet() {
+  for (i = 0; i < 20; i++) {
+    for (j = 0; j < 5; j++) {
+      if (bullets[i][j].shot == true && bullets[i][j].shooting == false) {
+        bullets[i][j].shooting = true;
+        bullets[i][j].x = x;
+        bullets[i][j].y = y;
+        shooting = false;
+      } else if (bullets[i][j].shot == true && bullets[i][j].shooting == true) {
+        bullets[i][j].y -= 3;
+      }
+      if (bullets[i][j].y < 0 && bullets[i][j].shooting == true) {
+        bullets[i][j].shot = false;
+        bullets[i][j].shooting = false;
+      }
+      if (bullets[i][j].shot == true) {
+        ctx.beginPath();
+        ctx.rect(bullets[i][j].x, bullets[i][j].y, bulletWidth, bulletHeight);
+        ctx.fillStyle = "#FF0000";
+        ctx.fill();
+        ctx.closePath();
+      }
+    }
   }
 }
-function createBullet() {
-  ctx.beginPath();
-  ctx.Rect(bulletXpos, bulletYpos, bulletWidth, bulletHeight);
-  ctx.fillStyle = "#FF0000";
-  ctx.fill();
-  ctx.closePath();
+
+//Set an enemy to active status everytime cooldown is over
+function setEnemies() {
+  for (i = 0; i < 20; i++) {
+    for (j = 0; j < 5; j++) {
+      if (enemies[i][j].status == false) {
+        if (rectangleEnemyCooldown >= Date.now() - rectangledelay) {
+          return;
+        } else {
+          enemies[i][j].status = true;
+          rectangleEnemyCooldown = Date.now();
+        }
+      }
+    }
+  }
+}
+
+//create and draw enemies
+function createEnemies() {
+  for (i = 0; i < 20; i++) {
+    for (j = 0; j < 5; j++) {
+      if (enemies[i][j].status == true && enemies[i][j].moving == false) {
+        enemies[i][j].x = Math.floor(
+          Math.random() * (canvas.width - rectangleEnemyWidth) + 1
+        );
+        enemies[i][j].y = 0;
+        enemies[i][j].moving = true;
+      } else if (enemies[i][j].status == true && enemies[i][j].moving == true) {
+        enemies[i][j].y += 1;
+      }
+      if (enemies[i][j].y == canvas.height) {
+        enemies[i][j].status = false;
+        enemies[i][j].moving = false;
+      }
+      if (enemies[i][j].status == true) {
+        ctx.beginPath();
+        ctx.rect(
+          enemies[i][j].x,
+          enemies[i][j].y,
+          rectangleEnemyWidth,
+          rectangleEnemyLength
+        );
+        ctx.fillStyle = "#228B22";
+        ctx.fill();
+        ctx.closePath();
+      }
+    }
+  }
+}
+function detectCollisions() {
+  for (i = 0; i < 20; i++) {
+    for (j = 0; j < 5; j++) {
+      for (q = 0; q < 20; q++) {
+        for (p = 0; p < 5; p++) {
+          if (
+            bullets[q][p].x > enemies[i][j].x &&
+            bullets[q][p].x < enemies[i][j].x + rectangleEnemyWidth &&
+            bullets[q][p].y > enemies[i][j].y &&
+            bullets[q][p].y < enemies[i][j].y + rectangleEnemyLength &&
+            bullets[q][p].shot == true &&
+            enemies[i][j].status == true
+          ) {
+            enemies[i][j].status = false;
+            enemies[i][j].moving = false;
+            bullets[q][p].shot = false;
+            bullets[q][p].shooting = false;
+          }
+        }
+      }
+    }
+  }
 }
 
 //draw player
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawPlayer();
-  if ((shooting = true)) {
-    createBullet();
-  }
+  createBullet();
+  setEnemies();
+  createEnemies();
+  detectCollisions();
   x += dx;
   y += dy;
   dx = 0;
   dy = 0;
   if (rightPressed == true) {
-    dx = 2;
+    dx = 3;
   }
   if (leftPressed == true) {
-    dx = -2;
+    dx = -3;
   }
   if (upPressed == true) {
-    dy = -2;
+    dy = -3;
   }
   if (downPressed == true) {
-    dy = 2;
+    dy = 3;
+  }
+  if (shooting == true) {
+    let found = false;
+    for (i = 0; i < 20; i++) {
+      for (j = 0; j < 5; j++) {
+        if (bullets[i][j].shot == false) {
+          bullets[i][j].shot = true;
+          found = true;
+        }
+        if (found == true) {
+          break;
+        }
+      }
+      if (found == true) {
+        break;
+      }
+    }
   }
   requestAnimationFrame(draw);
 }
@@ -84,7 +205,12 @@ function keyDown(e) {
     downPressed = true;
   }
   if (e.keyCode == spacePressed) {
-    shooting = true;
+    if (lastShot >= Date.now() - delay) {
+      shooting = false;
+    } else {
+      lastShot = Date.now();
+      shooting = true;
+    }
   }
 }
 
@@ -97,6 +223,9 @@ function keyUp(e) {
     upPressed = false;
   } else if (e.key == "Down" || e.key == "ArrowDown") {
     downPressed = false;
+  }
+  if (e.keyCode == spacePressed) {
+    shooting = false;
   }
 }
 
