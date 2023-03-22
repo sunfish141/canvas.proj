@@ -201,40 +201,50 @@ function draw() {
   requestAnimationFrame(draw);
 }
 //LISTEN FOR KEY PRESSES
-document.addEventListener("keydown", keyDown, false);
-document.addEventListener("keyup", keyUp, false);
+document.addEventListener("keydown", keyDown, true);
+document.addEventListener("keyup", keyUp, true);
+document.addEventListener("click", Shoot);
 
 // HANDLE MOVEMENT
 function keyDown(e) {
-  if (e.key == "Right" || e.key == "ArrowRight") {
+  if (e.keyCode == 68) {
     rightPressed = true;
-  } else if (e.key == "Left" || e.key == "ArrowLeft") {
+  } else if (e.keyCode == 65) {
     leftPressed = true;
-  } else if (e.key == "Up" || e.key == "ArrowUp") {
+  } else if (e.keyCode == 87) {
     upPressed = true;
-  } else if (e.key == "Down" || e.key == "ArrowDown") {
+  } else if (e.keyCode == 83) {
     downPressed = true;
-  } else if (e.key == " " || e.keycode == spacePressed) {
-    if (lastShot >= Date.now() - delay) {
-      shooting = false;
-    } else {
-      lastShot = Date.now();
-      shooting = true;
-    }
-  }
+  } //else if (e.key == " " || e.keycode == spacePressed) {
+  //if (lastShot >= Date.now() - delay) {
+  //shooting = false;
+  //} else {
+  //lastShot = Date.now();
+  //shooting = true;
+  //}
+  //}
 }
 
 function keyUp(e) {
-  if (e.key == "Right" || e.key == "ArrowRight") {
+  if (e.keyCode == 68) {
     rightPressed = false;
-  } else if (e.key == "Left" || e.key == "ArrowLeft") {
+  } else if (e.keyCode == 65) {
     leftPressed = false;
-  } else if (e.key == "Up" || e.key == "ArrowUp") {
+  } else if (e.keyCode == 87) {
     upPressed = false;
-  } else if (e.key == "Down" || e.key == "ArrowDown") {
+  } else if (e.keyCode == 83) {
     downPressed = false;
-  } else if (e.key == " " || e.keyCode == spacePressed) {
+  } //else if (e.key == " " || e.keyCode == spacePressed) {
+  //shooting = false;
+  //}
+}
+
+function Shoot() {
+  if (lastShot >= Date.now() - delay) {
     shooting = false;
+  } else {
+    lastShot = Date.now();
+    shooting = true;
   }
 }
 
