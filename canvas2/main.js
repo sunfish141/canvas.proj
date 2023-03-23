@@ -22,6 +22,7 @@ let rectangleEnemyLength = 50;
 let rectangleEnemyWidth = 50;
 let rectangleEnemyCooldown = 0;
 let rectangledelay = 1000;
+let circularEnemyRadius = 40;
 
 //POPULATE ARRAYS
 for (i = 0; i < 20; i++) {
@@ -34,7 +35,20 @@ for (i = 0; i < 20; i++) {
 for (i = 0; i < 20; i++) {
   enemies[i] = [];
   for (j = 0; j < 5; j++) {
-    enemies[i][j] = { x: 0, y: 0, status: false, moving: false, hits: 0 };
+    let setrectangularWeakness = Math.floor(Math.random() * 3);
+    let enemyType = Math.floor(Math.random() * 5);
+    let type = "rectangular";
+    if (enemyType == 0) {
+      type = "circular";
+    }
+    enemies[i][j] = {
+      x: 0,
+      y: 0,
+      status: false,
+      moving: false,
+      hits: setrectangularWeakness,
+      type: type,
+    };
   }
 }
 
@@ -83,7 +97,8 @@ function setEnemies() {
           return;
         } else {
           enemies[i][j].status = true;
-          enemies[i][j].hits = 0;
+          let rectangularWeakness = Math.floor(Math.random() * 3);
+          enemies[i][j].hits = rectangularWeakness;
           rectangleEnemyCooldown = Date.now();
         }
       }
@@ -102,13 +117,17 @@ function createEnemies() {
         enemies[i][j].y = 0;
         enemies[i][j].moving = true;
       } else if (enemies[i][j].status == true && enemies[i][j].moving == true) {
-        enemies[i][j].y += 1;
+        if (enemies[i][j].type == "rectangular") {
+          enemies[i][j].y += 1;
+        } else if (enemies[i][j].type == "circular") {
+          enemies[i][j].y += 2;
+        }
       }
       if (enemies[i][j].y == canvas.height) {
         enemies[i][j].status = false;
         enemies[i][j].moving = false;
       }
-      if (enemies[i][j].status == true) {
+      if (enemies[i][j].status == true && enemies[i][j].type == "rectangular") {
         ctx.beginPath();
         ctx.rect(
           enemies[i][j].x,
@@ -123,9 +142,30 @@ function createEnemies() {
         } else if (enemies[i][j].hits == 2) {
           ctx.fillStyle = "#8b0000";
         }
+        ctx.fill();
+        ctx.closePath();
+      } else if (
+        enemies[i][j].status == true &&
+        enemies[i][j].type == "circular"
+      ) {
+        ctx.beginPath();
+        ctx.arc(
+          enemies[i][j].x,
+          enemies[i][j].y,
+          circularEnemyRadius,
+          0,
+          Math.PI * 2
+        );
+        if (enemies[i][j].hits == 0) {
+          ctx.fillStyle = "#228B22";
+        } else if (enemies[i][j].hits == 1) {
+          ctx.fillStyle = "#FFFF00";
+        } else if (enemies[i][j].hits == 2) {
+          ctx.fillStyle = "#8b0000";
+        }
+        ctx.fill();
+        ctx.closePath();
       }
-      ctx.fill();
-      ctx.closePath();
     }
   }
 }
@@ -141,12 +181,36 @@ function detectCollisions() {
             bullets[q][p].y > enemies[i][j].y &&
             bullets[q][p].y < enemies[i][j].y + rectangleEnemyLength &&
             bullets[q][p].shot == true &&
-            enemies[i][j].status == true
+            enemies[i][j].status == true &&
+            enemies[i][j].type == "rectangular"
           ) {
             enemies[i][j].hits++;
             bullets[q][p].shot = false;
             bullets[q][p].shooting = false;
-            if (enemies[i][j].hits == 3) {
+            if (enemies[i][j].hits >= 3) {
+              enemies[i][j].status = false;
+              enemies[i][j].moving = false;
+            }
+          } else if (
+            (bullets[q][p].x > enemies[i][j].x &&
+              bullets[q][p].x < enemies[i][j].x + circularEnemyRadius &&
+              bullets[q][p].y > enemies[i][j].y &&
+              bullets[q][p].y < enemies[i][j].y + circularEnemyRadius &&
+              bullets[q][p].shot == true &&
+              enemies[i][j].status == true &&
+              enemies[i][j].type == "circular") ||
+            (bullets[q][p].x < enemies[i][j].x &&
+              bullets[q][p].x > enemies[i][j].x - circularEnemyRadius &&
+              bullets[q][p].y < enemies[i][j].y &&
+              bullets[q][p].y > enemies[i][j].y - circularEnemyRadius &&
+              bullets[q][p].shot == true &&
+              enemies[i][j].status == true &&
+              enemies[i][j].type == "circular")
+          ) {
+            enemies[i][j].hits++;
+            bullets[q][p].shot = false;
+            bullets[q][p].shooting = false;
+            if (enemies[i][j].hits >= 3) {
               enemies[i][j].status = false;
               enemies[i][j].moving = false;
             }
@@ -170,16 +234,32 @@ function draw() {
   dx = 0;
   dy = 0;
   if (rightPressed == true) {
-    dx = 3;
+    if (x + ballRadius > canvas.width) {
+      dy = 0;
+    } else {
+      dx = 3;
+    }
   }
   if (leftPressed == true) {
-    dx = -3;
+    if (x - ballRadius < 0) {
+      dy = 0;
+    } else {
+      dx = -3;
+    }
   }
   if (upPressed == true) {
-    dy = -3;
+    if (y - ballRadius < 0) {
+      dy = 0;
+    } else {
+      dy = -3;
+    }
   }
   if (downPressed == true) {
-    dy = 3;
+    if (y + ballRadius > canvas.height) {
+      dy = 0;
+    } else {
+      dy = 3;
+    }
   }
   if (shooting == true) {
     let found = false;
@@ -215,14 +295,7 @@ function keyDown(e) {
     upPressed = true;
   } else if (e.keyCode == 83) {
     downPressed = true;
-  } //else if (e.key == " " || e.keycode == spacePressed) {
-  //if (lastShot >= Date.now() - delay) {
-  //shooting = false;
-  //} else {
-  //lastShot = Date.now();
-  //shooting = true;
-  //}
-  //}
+  }
 }
 
 function keyUp(e) {
@@ -234,9 +307,7 @@ function keyUp(e) {
     upPressed = false;
   } else if (e.keyCode == 83) {
     downPressed = false;
-  } //else if (e.key == " " || e.keyCode == spacePressed) {
-  //shooting = false;
-  //}
+  }
 }
 
 function Shoot() {
