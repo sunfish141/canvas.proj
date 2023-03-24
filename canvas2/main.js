@@ -3,6 +3,7 @@ const ctx = canvas.getContext("2d");
 //INITIALIZE VARIABLES
 let x = canvas.width / 2;
 let y = canvas.height / 2;
+let health = 1000;
 const ballRadius = 10;
 const bulletWidth = 5;
 const bulletHeight = 20;
@@ -21,8 +22,8 @@ let enemies = [];
 let rectangleEnemyLength = 50;
 let rectangleEnemyWidth = 50;
 let rectangleEnemyCooldown = 0;
-let rectangledelay = 1000;
-let circularEnemyRadius = 40;
+let rectangledelay = 700;
+let circularEnemyRadius = 30;
 
 //POPULATE ARRAYS
 for (i = 0; i < 20; i++) {
@@ -59,6 +60,12 @@ function drawPlayer() {
   ctx.fillStyle = "#0095DD";
   ctx.fill();
   ctx.closePath();
+}
+
+function drawHealth() {
+  ctx.font = "16px Arial";
+  ctx.fillStyle = "#0095DD";
+  ctx.fillText(`Health: ${health}`, canvas.width - 120, 20);
 }
 
 //Create and draw bullets
@@ -123,9 +130,10 @@ function createEnemies() {
           enemies[i][j].y += 2;
         }
       }
-      if (enemies[i][j].y == canvas.height) {
+      if (enemies[i][j].y >= canvas.height && enemies[i][j].status == true) {
         enemies[i][j].status = false;
         enemies[i][j].moving = false;
+        health -= 50;
       }
       if (enemies[i][j].status == true && enemies[i][j].type == "rectangular") {
         ctx.beginPath();
@@ -170,6 +178,7 @@ function createEnemies() {
   }
 }
 
+///DeTECT BULLET, ENEMY, PLAYER COLLISION
 function detectCollisions() {
   for (i = 0; i < 20; i++) {
     for (j = 0; j < 5; j++) {
@@ -219,6 +228,33 @@ function detectCollisions() {
       }
     }
   }
+  //DETECT PLAYER COLLISION
+  for (i = 0; i < 20; i++) {
+    for (j = 0; j < 5; j++) {
+      let e = enemies[i][j];
+      if (
+        x > e.x &&
+        x < e.x + rectangleEnemyWidth &&
+        y > e.y &&
+        y < e.y + rectangleEnemyLength &&
+        e.status == true &&
+        e.type == "rectangular"
+      ) {
+        health -= 100;
+        e.status = false;
+        e.moving = false;
+      } else if (e.type == "circular" && e.status == true) {
+        let base = Math.abs(e.x - x);
+        let height = Math.abs(e.y - y);
+        let dist = Math.sqrt(base ** 2 + height ** 2);
+        if (dist < ballRadius + circularEnemyRadius) {
+          health -= 100;
+          e.status = false;
+          e.moving = false;
+        }
+      }
+    }
+  }
 }
 
 //draw player
@@ -229,6 +265,10 @@ function draw() {
   setEnemies();
   createEnemies();
   detectCollisions();
+  drawHealth();
+  if (health <= 0) {
+    document.location.reload();
+  }
   x += dx;
   y += dy;
   dx = 0;
