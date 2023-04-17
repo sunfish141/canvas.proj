@@ -13,7 +13,6 @@ let upPressed = false;
 let downPressed = false;
 let dx = 0;
 let dy = 0;
-let additionalMovespeed = 0;
 let spacePressed = 32;
 let bullets = [];
 let shooting = false;
@@ -73,13 +72,13 @@ for (i = 0; i < 20; i++) {
     enemies[i][j] = {
       x: 0,
       y: 0,
-      shotCooldown: 0,
       status: false,
       moving: false,
       hits: setrectangularWeakness,
       type: type,
       armour: 0,
       shooter: false,
+      shotCooldown: 0,
     };
   }
 }
@@ -318,9 +317,8 @@ function bulletEnemies() {
         let bulletfound = false;
         let yoffset = 0;
         if (enemies[i][j].shotCooldown >= Date.now() - enemyBulletdelay) {
-          enemies[i][j].shotCooldown = enemies[i][j].shotCooldown;
+          return;
         } else {
-          enemies[i][j].shotCooldown = Date.now();
           for (p = 0; p < 20; p++) {
             for (q = 0; q < 5; q++) {
               if (enemies[p][q].status == false) {
@@ -336,8 +334,6 @@ function bulletEnemies() {
                 enemies[p][q].moving = true;
                 enemies[p][q].type = "shooterbullet";
                 enemies[p][q].hits = 2;
-                enemies[p][q].shooter = false;
-                enemies[p][q].shotCooldown = 0;
                 bulletfound = true;
                 break;
               }
@@ -346,6 +342,7 @@ function bulletEnemies() {
               break;
             }
           }
+          enemies[i][j].shotCooldown = Date.now();
         }
       }
     }
@@ -499,28 +496,28 @@ function draw() {
     if (x + ballRadius > canvas.width) {
       dy = 0;
     } else {
-      dx = 3 + additionalMovespeed;
+      dx = 3;
     }
   }
   if (leftPressed == true) {
     if (x - ballRadius < 0) {
       dy = 0;
     } else {
-      dx = -3 - additionalMovespeed;
+      dx = -3;
     }
   }
   if (upPressed == true) {
     if (y - ballRadius < 0) {
       dy = 0;
     } else {
-      dy = -3 - additionalMovespeed;
+      dy = -3;
     }
   }
   if (downPressed == true) {
     if (y + ballRadius > canvas.height) {
       dy = 0;
     } else {
-      dy = 3 + additionalMovespeed;
+      dy = 3;
     }
   }
   if (shooting == true) {
@@ -583,36 +580,3 @@ function Shoot() {
 }
 
 draw();
-
-//BUTTON UPGRADES
-document
-  .getElementById("fastermovespeed")
-  .addEventListener("click", increaseMovement);
-document
-  .getElementById("fastershootspeed")
-  .addEventListener("click", increaseFireRate);
-document.getElementById("morehealth").addEventListener("click", increaseHealth);
-
-function increaseMovement() {
-  if (additionalMovespeed >= 2.0) {
-    additionalMovespeed = additionalMovespeed;
-    console.log("limit");
-  } else {
-    additionalMovespeed += 0.2;
-    console.log("increase");
-  }
-}
-
-function increaseFireRate() {
-  if (delay <= 150) {
-    delay = delay;
-    console.log("shootlimit");
-  } else {
-    delay -= 10;
-    console.log("faster");
-  }
-}
-
-function increaseHealth() {
-  health += 100;
-}
