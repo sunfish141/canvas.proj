@@ -32,6 +32,8 @@ let shooterWidth = 20;
 let shooterLength = 25;
 let enemyBulletdelay = 1500;
 let enemybulletradius = 9;
+let upgradeCycle = 30000;
+let lastUpgrade = 0;
 
 //POPULATE ARRAYS
 for (i = 0; i < 20; i++) {
@@ -472,6 +474,7 @@ function draw() {
   createEnemies();
   detectCollisions();
   drawHealth();
+  regenUpgrades();
   if (health <= 0) {
     location.reload(true);
   }
@@ -593,13 +596,26 @@ document
   .addEventListener("click", increaseFireRate);
 document.getElementById("morehealth").addEventListener("click", increaseHealth);
 
+function regenUpgrades() {
+  if (lastUpgrade <= Date.now() - upgradeCycle) {
+    console.log("e");
+    document.getElementById("fastermovespeed").style.opacity = "1";
+    document.getElementById("fastershootspeed").style.opacity = "1";
+    document.getElementById("morehealth").style.opacity = "1";
+  }
+}
+
 function increaseMovement() {
   if (additionalMovespeed >= 2.0) {
     additionalMovespeed = additionalMovespeed;
     console.log("limit");
-  } else {
+  } else if (document.getElementById("fastermovespeed").style.opacity != "0") {
     additionalMovespeed += 0.2;
     console.log("increase");
+    document.getElementById("fastermovespeed").style.opacity = "0";
+    document.getElementById("fastershootspeed").style.opacity = "0";
+    document.getElementById("morehealth").style.opacity = "0";
+    lastUpgrade = Date.now();
   }
 }
 
@@ -609,10 +625,18 @@ function increaseFireRate() {
     console.log("shootlimit");
   } else {
     delay -= 10;
+    document.getElementById("fastermovespeed").style.opacity = "0";
+    document.getElementById("fastershootspeed").style.opacity = "0";
+    document.getElementById("morehealth").style.opacity = "0";
+    lastUpgrade = Date.now();
     console.log("faster");
   }
 }
 
 function increaseHealth() {
   health += 100;
+  document.getElementById("fastermovespeed").style.opacity = "0";
+  document.getElementById("fastershootspeed").style.opacity = "0";
+  document.getElementById("morehealth").style.opacity = "0";
+  lastUpgrade = Date.now();
 }
