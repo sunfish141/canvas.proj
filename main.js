@@ -3,7 +3,7 @@ const ctx = canvas.getContext("2d");
 //INITIALIZE VARIABLES
 let x = canvas.width / 2;
 let y = canvas.height / 2;
-let health = 10000000;
+let health = 2500;
 const ballRadius = 10;
 const bulletWidth = 5;
 const bulletHeight = 20;
@@ -598,7 +598,6 @@ document.getElementById("morehealth").addEventListener("click", increaseHealth);
 
 function regenUpgrades() {
   if (lastUpgrade <= Date.now() - upgradeCycle) {
-    console.log("e");
     document.getElementById("fastermovespeed").style.opacity = "1";
     document.getElementById("fastershootspeed").style.opacity = "1";
     document.getElementById("morehealth").style.opacity = "1";
@@ -608,10 +607,8 @@ function regenUpgrades() {
 function increaseMovement() {
   if (additionalMovespeed >= 2.0) {
     additionalMovespeed = additionalMovespeed;
-    console.log("limit");
   } else if (document.getElementById("fastermovespeed").style.opacity != "0") {
     additionalMovespeed += 0.2;
-    console.log("increase");
     document.getElementById("fastermovespeed").style.opacity = "0";
     document.getElementById("fastershootspeed").style.opacity = "0";
     document.getElementById("morehealth").style.opacity = "0";
@@ -622,21 +619,22 @@ function increaseMovement() {
 function increaseFireRate() {
   if (delay <= 150) {
     delay = delay;
-    console.log("shootlimit");
-  } else {
+    console.log("limit");
+  } else if (document.getElementById("fastershootspeed").style.opacity != "0") {
     delay -= 10;
     document.getElementById("fastermovespeed").style.opacity = "0";
     document.getElementById("fastershootspeed").style.opacity = "0";
     document.getElementById("morehealth").style.opacity = "0";
     lastUpgrade = Date.now();
-    console.log("faster");
   }
 }
 
 function increaseHealth() {
-  health += 100;
-  document.getElementById("fastermovespeed").style.opacity = "0";
-  document.getElementById("fastershootspeed").style.opacity = "0";
-  document.getElementById("morehealth").style.opacity = "0";
-  lastUpgrade = Date.now();
+  if (document.getElementById("morehealth").style.opacity != "0") {
+    health += 100;
+    document.getElementById("fastermovespeed").style.opacity = "0";
+    document.getElementById("fastershootspeed").style.opacity = "0";
+    document.getElementById("morehealth").style.opacity = "0";
+    lastUpgrade = Date.now();
+  }
 }
